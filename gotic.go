@@ -41,8 +41,11 @@ func serveStatic(cmd *cobra.Command, args []string) {
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.Method, r.RemoteAddr, r.RequestURI)
-		next.ServeHTTP(w, r)
+		lrw := NewLoggingResponseWriter(w)
+		next.ServeHTTP(lrw, r)
+
+		statusCode := lrw.statusCode
+		log.Println(r.Method, r.RemoteAddr, r.RequestURI, statusCode, http.StatusText(statusCode))
 	})
 }
 
